@@ -51,9 +51,14 @@ This project includes:
 ---
 
 ## 🚀 Getting Started
-
 ### Frontend
 ```bash
 cd client
 npm install
 npm start
+```
+### AI
+```bash
+cd ai
+pip install -r requirements.txt
+python app.py
