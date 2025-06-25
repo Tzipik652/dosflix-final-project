@@ -216,7 +216,7 @@ export function UserCardList() {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch =
-      user.Name.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.FullName.toLowerCase().includes(searchText.toLowerCase()) ||
       user.Email.toLowerCase().includes(searchText.toLowerCase()) ||
       user.Phone.includes(searchText) ||
       user.Address.toLowerCase().includes(searchText.toLowerCase());

@@ -70,6 +70,7 @@
 // };
 
 // export default Camera;
+import { Button } from "antd";
 import React, { useRef, useState } from "react";
 
 const Camera: React.FC = () => {
@@ -78,12 +79,14 @@ const Camera: React.FC = () => {
   const [gender, setGender] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cameraPlay, setCameraPlay] = useState<boolean>(false);
 
   const startCamera = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
     }
+    setCameraPlay(true);
   };
 
   const captureAndSend = async () => {
@@ -129,20 +132,59 @@ const Camera: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>מצלמה</h2>
-      <video ref={videoRef} autoPlay width="400" height="300" />
-      <canvas ref={canvasRef} style={{ display: "none" }} />
-      <div>
-        <button onClick={startCamera}>הפעל מצלמה</button>
-        <button onClick={captureAndSend} disabled={loading}>
-          צלם ושלח
-        </button>
-      </div>
-      {loading && <p>טעינה...</p>}
-      {gender && <p>המגדר שזוהה: {gender}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+   <div style={{ textAlign: "left", marginBottom: "1rem" }}>
+  <label style={{ fontSize: "0.875rem", color: "#107d88", display: "block", marginBottom: "0.25rem" }}>
+    זיהוי מגדר אוטומטי
+  </label>
+
+  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-start" }}>
+    {!cameraPlay?
+    <button type="button" onClick={startCamera} className="sign-up-button" style={{ width: "fit-content" }}>
+      הפעל מצלמה
+    </button>
+    :
+    <></>
+    }
+    
+
+    <video
+      ref={videoRef}
+      autoPlay
+      width="100%"
+      height="200"
+      style={{
+        border: "1px solid #a8e4e8",
+        borderRadius: "6px",
+        backgroundColor: "#f0fcfd",
+      }}
+    />
+
+    <canvas ref={canvasRef} style={{ display: "none" }} />
+
+    <button
+      type="button"
+      onClick={captureAndSend}
+      className="sign-up-button"
+      disabled={loading}
+      style={{ width: "fit-content" }}
+    >
+      צלם ושלח
+    </button>
+
+    {loading && <p style={{ color: "#107d88", margin: 0 }}>טעינה...</p>}
+    {gender && (
+      <p style={{ color: "#107d88", margin: 0 }}>
+        המגדר שזוהה: {gender === "female" ? "נקבה" : "זכר"}
+      </p>
+    )}
+    {error && (
+      <p className="error" style={{ margin: 0 }}>
+        {error}
+      </p>
+    )}
+  </div>
+</div>
+
   );
 };
 

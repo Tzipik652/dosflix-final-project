@@ -59,11 +59,11 @@ export function UserCard({ user, getOrders }: UserCardProps) {
           color: "white",
         }}
       >
-        {user.ProfileImageUrl ? null : user.Name?.[0] || "?"}
+        {user.ProfileImageUrl ? null : user.FullName?.[0] || "?"}
       </Avatar>
 
       <Typography variant="h6" fontWeight="bold" color={mainColor}>
-        {user.Name}
+        {user.FullName}
       </Typography>
 
       {/* טלפון */}
