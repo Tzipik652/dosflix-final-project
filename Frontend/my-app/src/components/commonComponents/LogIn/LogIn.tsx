@@ -208,7 +208,7 @@ const LogIn: FC<{}> = () => {
       </Button>
 
       <Typography textAlign="center" mt={3} fontSize={14}>
-        עדיין לא יצרת חשבון?{" "}
+        עדיין לא רשום?{" "}
         <Link to="/signup" style={{ color: "#1fbac0", textDecoration: "none" }}>
           הרשם עכשיו
         </Link>
