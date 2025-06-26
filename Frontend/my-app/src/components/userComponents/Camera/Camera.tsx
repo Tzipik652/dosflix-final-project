@@ -1,79 +1,143 @@
-// import React, { useState, useRef, useEffect } from 'react';
+// import React, { useRef, useState } from "react";
+// import {
+//   Box,
+//   Button,
+//   Typography,
+//   CircularProgress,
+//   Alert,
+//   Stack,
+// } from "@mui/material";
 
 // interface CameraProps {
-//   onCapture: (imageData: string) => void;
+//   onGenderDetected: (gender: "male" | "female") => void;
 // }
 
-// const Camera: React.FC<CameraProps> = ({ onCapture }) => {
-//   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-//   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-//   const videoRef = useRef<HTMLVideoElement | null>(null);
-//   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+// const Camera: React.FC<CameraProps> = ({ onGenderDetected }) => {
+//   const videoRef = useRef<HTMLVideoElement>(null);
+//   const canvasRef = useRef<HTMLCanvasElement>(null);
+//   const [gender, setGender] = useState<string | null>(null);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [cameraPlay, setCameraPlay] = useState<boolean>(false);
 
-//   useEffect(() => {
-//     // בקשת גישה למצלמה ברגע שהקומפוננטה עולה
-//     const startCamera = async () => {
-//       try {
-//         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-//         if (videoRef.current) {
-//           videoRef.current.srcObject = stream;
-//         }
-//         setHasPermission(true);
-//       } catch (err) {
-//         console.error('Camera permission denied', err);
-//         setHasPermission(false);
+//   const startCamera = async () => {
+//     try {
+//       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+//       if (videoRef.current) {
+//         videoRef.current.srcObject = stream;
+//         setCameraPlay(true);
 //       }
-//     };
+//     } catch {
+//       setError("לא ניתן להפעיל את המצלמה");
+//     }
+//   };
 
-//     startCamera();
-//   }, []);
-
-//   const captureImage = () => {
-//     if (!canvasRef.current || !videoRef.current) return;
-
+//   const captureAndSend = async () => {
+//     const video = videoRef.current;
 //     const canvas = canvasRef.current;
-//     const context = canvas.getContext('2d');
-//     if (!context) return;
+//     if (!video || !canvas) return;
 
-//     // ציור מהווידאו לתוך הקנבס
-//     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-//     const imageData = canvas.toDataURL('image/jpeg');
-//     setCapturedImage(imageData);         // שמירת התמונה בתצוגה
-//     onCapture(imageData);                // שליחה לפונקציה חיצונית אם צריך
+//     const ctx = canvas.getContext("2d");
+//     if (!ctx) return;
+
+//     canvas.width = video.videoWidth;
+//     canvas.height = video.videoHeight;
+//     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+//     setLoading(true);
+//     setError(null);
+
+//     canvas.toBlob(async (blob) => {
+//       if (!blob) return;
+
+//       const formData = new FormData();
+//       formData.append("image", blob, "photo.jpg");
+
+//       try {
+//         const res = await fetch("http://localhost:5000/predict-gender", {
+//           method: "POST",
+//           body: formData,
+//         });
+
+//         if (!res.ok) throw new Error("Server error");
+
+//         const result = await res.json();
+//         setGender(result.gender);
+//         onGenderDetected(result.gender);
+//       } catch {
+//         setError("לא ניתן לחבר לשרת. נסה שוב מאוחר יותר.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     }, "image/jpeg");
 //   };
 
 //   return (
-//     <div>
-//       {hasPermission === null && <p>טוען מצלמה...</p>}
-//       {hasPermission === false && <p>גישה למצלמה נדחתה.</p>}
-//       {hasPermission && (
-//         <div>
-//           <video ref={videoRef} autoPlay width="320" height="240" />
-//           <br />
-//           <button onClick={captureImage}>📸 צלם תמונה</button>
-//           <canvas
-//             ref={canvasRef}
-//             width="320"
-//             height="240"
-//             style={{ display: 'none' }}
-//           />
-//           {capturedImage && (
-//             <div>
-//               <h4>תמונה שצולמה:</h4>
-//               <img src={capturedImage} alt="Captured" style={{ border: '1px solid #ccc' }} />
-//             </div>
-//           )}
-//         </div>
-//       )}
-//     </div>
+//     <Box mt={2}>
+//       <Typography variant="subtitle1" color="#107d88" gutterBottom>
+//         זיהוי מגדר אוטומטי
+//       </Typography>
+
+//       <Stack spacing={2} alignItems="start">
+//         {!cameraPlay && (
+//           <Button variant="outlined" onClick={startCamera}>
+//             הפעל מצלמה
+//           </Button>
+//         )}
+
+//         <video
+//           ref={videoRef}
+//           autoPlay
+//           width="100%"
+//           height="200"
+//           style={{
+//             border: "1px solid #a8e4e8",
+//             borderRadius: "6px",
+//             backgroundColor: "#f0fcfd",
+//           }}
+//         />
+
+//         <canvas ref={canvasRef} style={{ display: "none" }} />
+
+//         <Button
+//           variant="contained"
+//           onClick={captureAndSend}
+//           disabled={loading || !cameraPlay}
+//           sx={{ bgcolor: "#1fbac0", "&:hover": { bgcolor: "#18a2a7" } }}
+//         >
+//              {gender ? "לניסיון חוזר צלם שוב" : "צלם ושלח"}
+//         </Button>
+
+//         {loading && <CircularProgress size={24} color="primary" />}
+
+//         {gender && (
+//           <Alert severity="info">
+//             המגדר שזוהה: {gender === "female" ? "נקבה" : "זכר"}
+//           </Alert>
+//         )}
+
+//         {error && <Alert severity="error">{error}</Alert>}
+//       </Stack>
+//     </Box>
 //   );
 // };
 
 // export default Camera;
-import { Button } from "antd";
 import React, { useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  CircularProgress,
+  Alert,
+  Stack,
+} from "@mui/material";
 
-const Camera: React.FC = () => {
+interface CameraProps {
+  onGenderDetected: (gender: "male" | "female") => void;
+}
+
+const Camera: React.FC<CameraProps> = ({ onGenderDetected }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gender, setGender] = useState<string | null>(null);
@@ -82,14 +146,49 @@ const Camera: React.FC = () => {
   const [cameraPlay, setCameraPlay] = useState<boolean>(false);
 
   const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setCameraPlay(true);
+      }
+    } catch {
+      setError("לא ניתן להפעיל את המצלמה");
     }
-    setCameraPlay(true);
   };
 
-  const captureAndSend = async () => {
+  const captureAndSend = async (blob: Blob) => {
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("image", blob, "photo.jpg");
+
+    try {
+      const res = await fetch("http://localhost:5000/predict-gender", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Server error");
+
+      const result = await res.json();
+      setGender(result.gender);
+      onGenderDetected(result.gender);
+    } catch {
+      setError("לא ניתן לחבר לשרת. נסה שוב מאוחר יותר.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    captureAndSend(file); // שלח את התמונה כמו שהיינו שולחים את התמונה מהמצלמה
+  };
+
+  const captureFromCamera = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
@@ -101,90 +200,62 @@ const Camera: React.FC = () => {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    setLoading(true); // Start loading state
-    setError(null); // Reset error state
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-
-      const formData = new FormData();
-      formData.append("image", blob, "photo.jpg");
-
-      try {
-        const res = await fetch("http://localhost:5000/predict-gender", {
-          // Make sure the URL is correct!
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          throw new Error("הייתה שגיאה בבקשה מהשרת");
-        }
-
-        const result = await res.json();
-        setGender(result.gender); // Update the gender state with the server response
-      } catch (error) {
-        setError("לא ניתן לחבר לשרת. בבקשה נסה שוב מאוחר יותר.");
-      } finally {
-        setLoading(false); // Stop loading state after request
-      }
+    canvas.toBlob((blob) => {
+      if (blob) captureAndSend(blob);
     }, "image/jpeg");
   };
 
   return (
-   <div style={{ textAlign: "left", marginBottom: "1rem" }}>
-  <label style={{ fontSize: "0.875rem", color: "#107d88", display: "block", marginBottom: "0.25rem" }}>
-    זיהוי מגדר אוטומטי
-  </label>
+    <Box mt={2}>
+      <Typography variant="subtitle1" color="#107d88" gutterBottom>
+        זיהוי מגדר אוטומטי
+      </Typography>
 
-  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-start" }}>
-    {!cameraPlay?
-    <button type="button" onClick={startCamera} className="sign-up-button" style={{ width: "fit-content" }}>
-      הפעל מצלמה
-    </button>
-    :
-    <></>
-    }
-    
+      <Stack spacing={2} alignItems="start">
+        {!cameraPlay && (
+          <Button variant="outlined" onClick={startCamera}>
+            הפעל מצלמה
+          </Button>
+        )}
 
-    <video
-      ref={videoRef}
-      autoPlay
-      width="100%"
-      height="200"
-      style={{
-        border: "1px solid #a8e4e8",
-        borderRadius: "6px",
-        backgroundColor: "#f0fcfd",
-      }}
-    />
+        <video
+          ref={videoRef}
+          autoPlay
+          width="100%"
+          height="200"
+          style={{
+            border: "1px solid #a8e4e8",
+            borderRadius: "6px",
+            backgroundColor: "#f0fcfd",
+          }}
+        />
 
-    <canvas ref={canvasRef} style={{ display: "none" }} />
+        <canvas ref={canvasRef} style={{ display: "none" }} />
 
-    <button
-      type="button"
-      onClick={captureAndSend}
-      className="sign-up-button"
-      disabled={loading}
-      style={{ width: "fit-content" }}
-    >
-      צלם ושלח
-    </button>
+        <Button
+          variant="contained"
+          onClick={captureFromCamera}
+          disabled={loading || !cameraPlay}
+          sx={{ bgcolor: "#1fbac0", "&:hover": { bgcolor: "#18a2a7" } }}
+        >
+          {gender ? "לניסיון חוזר צלם שוב" : "צלם ושלח"}
+        </Button>
 
-    {loading && <p style={{ color: "#107d88", margin: 0 }}>טעינה...</p>}
-    {gender && (
-      <p style={{ color: "#107d88", margin: 0 }}>
-        המגדר שזוהה: {gender === "female" ? "נקבה" : "זכר"}
-      </p>
-    )}
-    {error && (
-      <p className="error" style={{ margin: 0 }}>
-        {error}
-      </p>
-    )}
-  </div>
-</div>
+        {/* ✨ חדש: כפתור בחירת תמונה מהמחשב */}
+        <Button variant="outlined" component="label">
+          העלי תמונה מהמחשב
+          <input type="file" accept="image/*" hidden onChange={handleFileUpload} />
+        </Button>
 
+        {loading && <CircularProgress size={24} color="primary" />}
+        {gender && (
+          <Alert severity="info">
+            המגדר שזוהה: {gender === "female" ? "נקבה" : "זכר"}
+          </Alert>
+        )}
+        {error && <Alert severity="error">{error}</Alert>}
+      </Stack>
+    </Box>
   );
 };
 

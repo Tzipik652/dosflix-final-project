@@ -50,7 +50,7 @@ namespace BL.Profiles
             #region User+Customer to BLUser
 
             CreateMap<User, BLUser>()
-.ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.RoleId))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.RoleId))
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateCreated))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
@@ -58,44 +58,33 @@ namespace BL.Profiles
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.FullName : null))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.Phone : null))
-               .ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
-    src.Customer != null && src.Customer.Gender == "Female" ? false : true))
-
-      //.ForMember(dest => dest.AgeGroup, opt => opt.MapFrom(src =>
-      //    src.Customer != null ? (eAgeGroup?)src.Customer.AgeGroup : null))
-      .ForMember(dest => dest.AgeGroup, opt => opt.MapFrom(src =>
-    src.Customer != null ? src.Customer.AgeGroup : null))
-
-
+                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Customer != null && src.Customer.Gender == "Female" ? false : true))
+                .ForMember(dest => dest.AgeGroup, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.AgeGroup : null))
                 .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.ProfilePicture : null))
                 .ForMember(dest => dest.EmailLinks, opt => opt.Ignore()) // אפשר להשלים לפי הצורך
                 .ForMember(dest => dest.Orders, opt => opt.Ignore());
 
             CreateMap<BLUser, User>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
-                .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateCreated))
-                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
-                .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => (int)src.Role))
-                .ForMember(dest => dest.Customer, opt => opt.Ignore()); // נטפל ב־Customer בנפרד אם צריך
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+               .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+               .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
+               .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateCreated))
+               .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+               .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => (int)src.Role))
+               .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src)) // ✨ שימו לב לזה – נשתמש במיפוי הקיים של BLUser → Customer
+               ;
 
             CreateMap<BLUser, Customer>()
-                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
-                //.ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
-                //    src.Gender == eGender.Male ? "Male" : "Female"))
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
-              src.Gender ? "Male" : "Female"))
-
-                .ForMember(dest => dest.AgeGroup, opt => opt.MapFrom(src => (int?)src.AgeGroup))
-                .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfilePicture))
-                .ForMember(dest => dest.User, opt => opt.Ignore())
-                .ForMember(dest => dest.AgeGroupNavigation, opt => opt.Ignore())
-                .ForMember(dest => dest.EmailLinks, opt => opt.Ignore())
-                .ForMember(dest => dest.Orders, opt => opt.Ignore());
-
+             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
+             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
+             .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender ? "Male" : "Female"))
+             .ForMember(dest => dest.AgeGroup, opt => opt.MapFrom(src => (int?)src.AgeGroup))
+             .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfilePicture))
+             .ForMember(dest => dest.User, opt => opt.Ignore())
+             .ForMember(dest => dest.AgeGroupNavigation, opt => opt.Ignore())
+             .ForMember(dest => dest.EmailLinks, opt => opt.Ignore())
+             .ForMember(dest => dest.Orders, opt => opt.Ignore());
 
 
             #endregion

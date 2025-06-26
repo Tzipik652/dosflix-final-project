@@ -21,15 +21,36 @@ namespace DAL.Services
         {
             try
             {
-                db.Users.Add(t);
-                await db.SaveChangesAsync();
-                return t;
+                // 1. קודם כל שומר את המשתמש (בלי הלקוח)
+                var userEntry = await db.Users.AddAsync(new User
+                {
+                    Email = t.Email,
+                    Password = t.Password,
+                    RoleId = t.RoleId,
+                    DateCreated = t.DateCreated,
+                    IsActive = t.IsActive
+                });
+
+                await db.SaveChangesAsync(); // כדי שיתקבל ה־ID
+
+                var userId = userEntry.Entity.Id;
+
+                // 2. אם יש לקוח, מקשר אותו עם ה־UserId
+                if (t.Customer != null)
+                {
+                    t.Customer.UserId = userId;
+                    await db.Customers.AddAsync(t.Customer);
+                    await db.SaveChangesAsync();
+                }
+
+                return userEntry.Entity;
             }
             catch (Exception ex)
             {
                 throw new Exception("Error creating User", ex);
             }
         }
+
 
         public async Task<User> Delete(User t)
         {
@@ -69,7 +90,10 @@ namespace DAL.Services
         {
             try
             {
-                return await db.Users.Include(u => u.Role).ToListAsync();
+                return await db.Users
+                    .Include(u => u.Role)
+                    .Include(u => u.Customer)
+                        .ThenInclude(c => c.AgeGroupNavigation).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -82,12 +106,17 @@ namespace DAL.Services
             try
             {
                 return await db.Users
-                    .FirstOrDefaultAsync(c => c.Id == id);
+                    .Include(u => u.Role)
+                    .Include(u => u.Customer)
+                        .ThenInclude(c => c.AgeGroupNavigation)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
             }
             catch (Exception ex)
             {
                 throw new Exception("שגיאה בהחזרת משתמש לפי מזהה", ex);
             }
         }
+
     }
 }

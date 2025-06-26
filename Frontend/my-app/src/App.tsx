@@ -3,13 +3,13 @@ import "./App.css";
 import React from "react";
 import AppContent from "./components/userComponents/AppContent/AppContent";
 import { Routes, Route } from "react-router-dom";
-import  {LogIn}  from "./components/commonComponents/LogIn/LogIn";
+import LogIn  from "./components/commonComponents/LogIn/LogIn";
 import { Dashboard } from "./components/adminComponents/Dashboard/Dashboard";
 import { useSelector } from "react-redux";
 import { RootState } from "./myStore";
 import AdminScreen from "./components/adminComponents/AdminScreen/AdminScreen";
 import Cart from "./components/userComponents/Cart/Cart";
-import { SignUp } from "./components/commonComponents/SignUp/SignUp";
+import SignUp from "./components/commonComponents/SignUp/SignUp";
 
 const App = () => {
   const user = useSelector((state: RootState) => state.auth);

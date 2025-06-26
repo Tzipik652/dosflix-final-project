@@ -1,9 +1,9 @@
 .login-page {
+  direction: rtl;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
- // background-color: #e0f7f9; // רקע בהיר טורקיז
 
   .login-container {
     width: 100%;
@@ -11,7 +11,7 @@
     padding: 2rem;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
     border-radius: 8px;
-    text-align: center;
+    text-align: right;
     font-family: 'Segoe UI', sans-serif;
     background-color: #ffffff;
 
@@ -20,17 +20,19 @@
       margin: 0 auto;
       display: block;
     }
-    
+
     h2 {
       font-size: 1.5rem;
       font-weight: bold;
-      color: #107d88; // טורקיז כהה
+      color: #107d88;
+      text-align: center;
     }
 
     .sub-text {
       font-size: 0.875rem;
       color: #489ca1;
       margin-bottom: 1.5rem;
+      text-align: center;
 
       a {
         color: #1fbac0;
@@ -44,7 +46,6 @@
       flex-direction: column;
 
       label {
-        text-align: left;
         font-size: 0.875rem;
         margin-bottom: 0.25rem;
         color: #107d88;
@@ -88,6 +89,7 @@
         }
       }
     }
+
     .divider {
       display: flex;
       align-items: center;
@@ -141,8 +143,10 @@
       }
     }
   }
-  .error{
+
+  .error {
     color: red;
+    text-align: center;
+    margin-bottom: 1rem;
   }
-  
 }

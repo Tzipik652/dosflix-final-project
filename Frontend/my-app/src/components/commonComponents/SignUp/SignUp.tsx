@@ -1,236 +1,198 @@
-// import React, { useState } from 'react';
-// // import './SignUp.scss';
-// import axios from 'axios';
-// import { useDispatch } from 'react-redux';
-// import { useNavigate } from 'react-router-dom';
-// import { loginUser } from '../../../redux/authSlice';
-
-// export function SignUp() {
-//     const [username, setUsername] = useState('');
-//     const [email, setEmail] = useState('');
-//     const [password, setPassword] = useState('');
-//     const [error, setError] = useState('');
-//     const dispatch = useDispatch();
-//     const navigate = useNavigate();
-
-//     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//         e.preventDefault();
-//         setError('');
-
-//         if (!username || !email || !password) {
-//             setError('All fields are required');
-//             return;
-//         }
-
-//         try {
-//             const response = await axios.post('https://localhost:7229/DosFlix/Users/register', {
-//                 username,
-//                 email,
-//                 password,
-//             });
-
-//             const { token, username: name, role } = response.data;
-//             localStorage.setItem('token', token);
-//             dispatch(loginUser({ token, role, username: name }));
-
-//             navigate(role === 0 ? '/admin' : role === 1 ? '/manager' : '/user');
-//         } catch (err: any) {
-//             setError(err.response?.data || 'Registration failed');
-//         }
-//     };
-
-//     return (
-//         <div className="signup-page">
-//             <div className="signup-container">
-//                 <h2>Create your account</h2>
-//                 <form onSubmit={handleSubmit}>
-//                     {error && <p className="error">{error}</p>}
-
-//                     <label>Username</label>
-//                     <input
-//                         type="text"
-//                         placeholder="Enter a username"
-//                         value={username}
-//                         onChange={(e) => setUsername(e.target.value)}
-//                         required
-//                     />
-
-//                     <label>Email</label>
-//                     <input
-//                         type="email"
-//                         placeholder="Enter your email"
-//                         value={email}
-//                         onChange={(e) => setEmail(e.target.value)}
-//                         required
-//                     />
-
-//                     <label>Password</label>
-//                     <input
-//                         type="password"
-//                         placeholder="Enter a password"
-//                         value={password}
-//                         onChange={(e) => setPassword(e.target.value)}
-//                         required
-//                     />
-
-//                     <button type="submit" className="sign-up-button">Sign up</button>
-//                 </form>
-//             </div>
-//         </div>
-//     );
-// }
-import React, { useState } from "react";
-import axios from "axios";
-import { useDispatch } from "react-redux";
+import React, { FC } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Alert,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../../redux/authSlice";
-import "./SignUp.scss";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import Camera from "../../userComponents/Camera/Camera";
+import axios from "axios";
 
-export function SignUp() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [gender, setGender] = useState(true); // true = male
-  const [ageGroup, setAgeGroup] = useState<number | null>(null);
-  const [error, setError] = useState("");
-  const dispatch = useDispatch();
+const SignUp: FC<{}> = () => {
   const navigate = useNavigate();
+  const [error, setError] = React.useState("");
 
-//     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//         e.preventDefault();
-//         setError('');
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      password: "",
+      phone: "",
+      gender: "male", // או "female"
+      ageGroup: "",
+    },
+    validationSchema: Yup.object({
+      username: Yup.string().required("שדה חובה"),
+      email: Yup.string().email("אימייל לא תקין").required("שדה חובה"),
+      password: Yup.string().min(6, "לפחות 6 תווים").required("שדה חובה"),
+      phone: Yup.string().required("שדה חובה"),
+      gender: Yup.string().required("שדה חובה"),
+      ageGroup: Yup.string().required("שדה חובה"),
+    }),
+    onSubmit: async (values: {
+      username: any;
+      email: any;
+      password: any;
+      phone: any;
+      gender: string;
+      ageGroup: string | number;
+    }) => {
+      setError("");
+      try {
+        await axios.post("https://localhost:7229/DosFlix/Users/register", {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        phone: values.phone,
+        gender: values.gender === "male",
+        ageGroup: +values.ageGroup,
+        profilePicture: null,
+      });
 
-//         try {
-//             // const response = await axios.post('https://localhost:7229/DosFlix/Users/register', {
-//             //     request: {
-//             //         username,
-//             //         email,
-//             //         password,
-//             //         phone,
-//             //         gender,
-//             //         ageGroup,
-//             //         profilePicture: null
-//             //     }
-//             // });
-//             const response = await axios.post('https://localhost:7229/DosFlix/Users/register', {
-//   username,
-//   email,
-//   password,
-//   phone,
-//   gender,
-//   ageGroup,
-//   profilePicture: null
-// });
+      localStorage.setItem("savedEmail", values.email);
+      localStorage.setItem("savedPassword", values.password);
+      localStorage.setItem("rememberMe", "true");
 
+      navigate("/login");
 
-//             const { token, username: name, role } = response.data;
-//             localStorage.setItem('token', token);
-//             dispatch(loginUser({ token, role, username: name }));
-
-//              navigate(role === 0 ? '/admin' : role === 1 ? '/manager' : '/user');
-//             // navigate('/');
-//         } catch (err: any) {
-//             setError(err.response?.data || 'Registration failed');
-//         }
-//     };
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError('');
-
-    try {
-        const response = await axios.post('https://localhost:7229/DosFlix/Users/register', {
-            username,
-            email,
-            password,
-            phone,
-            gender,
-            ageGroup,
-            profilePicture: null
-        });
-
-        // אחרי הרשמה מוצלחת, פשוט להפנות לדף ההתחברות:
-        navigate('/login');
-    } catch (err: any) {
-        setError(err.response?.data || 'Registration failed');
-    }
-};
-
+      } catch (err: any) {
+        setError(err.response?.data || "ההרשמה נכשלה");
+      }
+    },
+  });
 
   return (
-    <div className="signup-page">
-      <div className="signup-container">
-        <h2>Create your account</h2>
-        <form onSubmit={handleSubmit}>
-          {error && (
-            <p className="error">
-              {typeof error === "string" ? error : "Registration failed"}
-            </p>
-          )}
+    <Box
+      component="form"
+      onSubmit={formik.handleSubmit}
+      sx={{
+        direction: "rtl",
+        maxWidth: 400,
+        mx: "auto",
+        mt: 5,
+        p: 3,
+        boxShadow: 3,
+        borderRadius: 2,
+        bgcolor: "#fff",
+      }}
+    >
+       <Box display="flex" justifyContent="center" mb={2}>
+              <img
+                src="https://ayeletginzburg.com/wp-content/uploads/2024/05/אייקון-פלאי-גדול-חלול-1024x1024.png"
+                alt="Logo"
+                style={{ width: 80, height: 80 }}
+              />
+            </Box>
+      
+      <Typography variant="h5" textAlign="center" color="#107d88" mb={2}>
+        הרשמה לחשבון חדש
+      </Typography>
 
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+      <TextField
+        fullWidth
+        label="שם משתמש"
+        margin="normal"
+        {...formik.getFieldProps("username")}
+        error={formik.touched.username && !!formik.errors.username}
+        helperText={
+          formik.touched.username && typeof formik.errors.username === "string"
+            ? formik.errors.username
+            : ""
+        }
+      />
 
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+      <TextField
+        fullWidth
+        label="אימייל"
+        margin="normal"
+        type="email"
+        {...formik.getFieldProps("email")}
+        error={formik.touched.email && !!formik.errors.email}
+        helperText={
+            formik.touched.email && typeof formik.errors.email === "string"
+              ? formik.errors.email
+              : ""
+          }
+      />
 
-          <label>Phone</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-          />
+      <TextField
+        fullWidth
+        label="סיסמה"
+        margin="normal"
+        type="password"
+        {...formik.getFieldProps("password")}
+        error={formik.touched.password && !!formik.errors.password}
+        helperText={
+          formik.touched.password && typeof formik.errors.password === "string"
+            ? formik.errors.password
+            : ""
+        }
+      />
 
-          <Camera></Camera>
+      <TextField
+        fullWidth
+        label="טלפון"
+        margin="normal"
+        type="tel"
+        {...formik.getFieldProps("phone")}
+        error={formik.touched.phone && !!formik.errors.phone}
+        helperText={
+          formik.touched.phone && typeof formik.errors.phone === "string"
+            ? formik.errors.phone
+            : ""
+        }
+      />
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="ageGroup-label">קבוצת גיל</InputLabel>
+        <Select
+          labelId="ageGroup-label"
+          label="קבוצת גיל"
+          {...formik.getFieldProps("ageGroup")}
+        >
+          <MenuItem value="1">מתחת ל־18</MenuItem>
+          <MenuItem value="2">18–30</MenuItem>
+          <MenuItem value="3">31–50</MenuItem>
+          <MenuItem value="4">51 ומעלה</MenuItem>
+        </Select>
+      </FormControl>
 
-          {/* //<label>Gender</label>
-          //</form><select
-           // value={gender ? "male" : "female"}
-           // onChange={(e) => setGender(e.target.value === "male")}
-          //</form>>
-            //<option value="male">Male</option>
-           // <option value="female">Female</option>
-         // </select> */}
 
-          <label>Age Group</label>
-          <select
-            value={ageGroup ?? ""}
-            onChange={(e) =>
-              setAgeGroup(e.target.value ? +e.target.value : null)
-            }
-          >
-            <option value="">Select Age Group</option>
-            <option value="1">Under 18</option>
-            <option value="2">18–30</option>
-            <option value="3">31–50</option>
-            <option value="4">51+</option>
-          </select>
 
-          <button type="submit" className="sign-up-button">
-            Sign up
-          </button>
-        </form>
-      </div>
-    </div>
+      <Box mt={2} mb={2}>
+        <Camera
+          onGenderDetected={(detectedGender) => {
+            formik.setFieldValue("gender", detectedGender);
+          }}
+        />
+      </Box>
+
+      <Button
+        fullWidth
+        type="submit"
+        variant="contained"
+        sx={{
+          bgcolor: "#1fbac0",
+          "&:hover": { bgcolor: "#18a2a7" },
+          fontWeight: "bold",
+        }}
+      >
+        הרשמה
+      </Button>
+    </Box>
   );
-}
+};
+export default SignUp;

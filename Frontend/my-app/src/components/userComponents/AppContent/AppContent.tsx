@@ -231,8 +231,7 @@ const AppContent: FC<AppContentProps> = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setNewMessage(event.target.value);
-  }; //רגע הניתובים של המנהל כן עובדים?
-  // הפונקציה מחזירה את האינדקס של הטאב לפי הנתיב, או -1 אם לא מתאים
+  }; 
   const getPageFromPath = (path: string) => {
     switch (path) {
       case "/all-movies":
